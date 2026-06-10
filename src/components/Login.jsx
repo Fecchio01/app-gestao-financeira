@@ -9,23 +9,27 @@ export default function Login() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState(null);
 
+  const [successMsg, setSuccessMsg] = useState(null);
+
   const handleAuth = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMsg(null);
 
-    let error;
     if (isSignUp) {
-      const res = await supabase.auth.signUp({ email, password });
-      error = res.error;
+      const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
+      if (signUpError) {
+        setError(signUpError.message);
+      } else if (!data.session) {
+        setSuccessMsg('Conta criada! Cheque seu e-mail para confirmar e fazer login (olhe o spam).');
+        setIsSignUp(false);
+      }
     } else {
-      const res = await supabase.auth.signInWithPassword({ email, password });
-      error = res.error;
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) setError(signInError.message);
     }
 
-    if (error) {
-      setError(error.message);
-    }
     setLoading(false);
   };
 
@@ -47,6 +51,12 @@ export default function Login() {
           {error && (
             <div className="bg-red-500/10 border border-red-500/50 text-red-400 text-sm p-3 rounded-xl text-center">
               {error === 'Invalid login credentials' ? 'Credenciais inválidas.' : error}
+            </div>
+          )}
+
+          {successMsg && (
+            <div className="bg-green-500/10 border border-green-500/50 text-green-400 text-sm p-3 rounded-xl text-center">
+              {successMsg}
             </div>
           )}
 

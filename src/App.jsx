@@ -19,6 +19,7 @@ function App() {
   const [isEditingGoal, setIsEditingGoal] = useState(false);
   const [editBanca, setEditBanca] = useState('');
   const [editMeta, setEditMeta] = useState('');
+  const [editRendaFixa, setEditRendaFixa] = useState('');
 
   const [transactions, setTransactions] = useState([]);
   const [goal, setGoal] = useState(null);
@@ -126,6 +127,7 @@ function App() {
   const openGoalEditor = () => {
     setEditBanca(goal.initialBalance || 0);
     setEditMeta(goal.annualGoal || 0);
+    setEditRendaFixa(goal.income || 0);
     setIsEditingGoal(true);
   };
 
@@ -134,7 +136,8 @@ function App() {
     await DataLayer.setUserGoal({
       ...goal,
       initialBalance: parseFloat(editBanca),
-      annualGoal: parseFloat(editMeta)
+      annualGoal: parseFloat(editMeta),
+      income: parseFloat(editRendaFixa)
     });
     setIsEditingGoal(false);
     loadData();
@@ -365,18 +368,23 @@ function App() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="glass-panel p-8 max-w-sm w-full animate-fade-scale">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2"><Settings className="text-brand-400" size={20} /> Editar Meta</h2>
+              <h2 className="text-xl font-bold text-white flex items-center gap-2"><Settings className="text-brand-400" size={20} /> Configurações Base</h2>
               <button onClick={() => setIsEditingGoal(false)} className="text-gray-500 hover:text-white transition-colors"><X size={24} /></button>
             </div>
             
-            <form onSubmit={saveGoalEdit} className="space-y-5">
+            <form onSubmit={saveGoalEdit} className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Sua Banca Atual (R$)</label>
+                <label className="block text-sm text-gray-400 mb-1">Renda Fixa Mensal (R$)</label>
+                <input required type="number" step="0.01" className="w-full bg-dark-900 border border-dark-700 rounded-xl p-3 text-white focus:outline-none focus:border-brand-500 transition-colors" value={editRendaFixa} onChange={e => setEditRendaFixa(e.target.value)} />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Banca Atual Acumulada (R$)</label>
                 <input required type="number" step="0.01" className="w-full bg-dark-900 border border-dark-700 rounded-xl p-3 text-white focus:outline-none focus:border-brand-500 transition-colors" value={editBanca} onChange={e => setEditBanca(e.target.value)} />
               </div>
               
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Meta Anual (R$)</label>
+                <label className="block text-sm text-gray-400 mb-1">Meta Anual (R$)</label>
                 <input required type="number" step="0.01" className="w-full bg-dark-900 border border-dark-700 rounded-xl p-3 text-white focus:outline-none focus:border-brand-500 transition-colors" value={editMeta} onChange={e => setEditMeta(e.target.value)} />
               </div>
               
