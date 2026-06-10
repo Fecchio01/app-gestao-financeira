@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react';
 import Onboarding from './components/Onboarding';
 import TransactionModal from './components/TransactionModal';
 import { DataLayer } from './lib/data';
+import { 
+  Hexagon, PenLine, Zap, Plus, Calculator, Briefcase, Coins, 
+  ArrowDownRight, Landmark, ShieldCheck, ListOrdered, Inbox, 
+  Repeat, X, PieChart, Settings, Rocket, Target
+} from 'lucide-react';
 
 function App() {
   const [needsOnboarding, setNeedsOnboarding] = useState(true);
@@ -147,12 +152,12 @@ function App() {
       <header className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 animate-slide-up">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-white flex flex-wrap items-center gap-3">
-            <span className="text-2xl">🌌</span> Painel Tático
+            <Hexagon className="text-brand-400" size={28} strokeWidth={2} /> Painel Tático
             <button onClick={openGoalEditor} className="bg-dark-800/80 hover:bg-dark-700 text-brand-300 text-xs md:text-sm px-3 py-1.5 rounded-lg border border-dark-600 font-medium transition-colors flex items-center gap-2 group shadow-sm" title="Editar Banca e Meta">
-              <span>🏦 Banca: {formatBRL(bancaTotal)}</span>
+              <span className="flex items-center gap-1.5"><Landmark size={14} /> Banca: {formatBRL(bancaTotal)}</span>
               <span className="text-dark-500">|</span>
-              <span>🎯 Meta: {formatBRL(goal.annualGoal)}</span>
-              <span className="text-xs text-brand-500/0 group-hover:text-brand-500 transition-colors">✎</span>
+              <span className="flex items-center gap-1.5"><Target size={14} /> Meta: {formatBRL(goal.annualGoal)}</span>
+              <PenLine size={14} className="text-brand-500/0 group-hover:text-brand-500 transition-colors" />
             </button>
           </h1>
           <p className="text-gray-400 text-sm capitalize mt-2 flex items-center gap-2">
@@ -168,7 +173,7 @@ function App() {
       <div className="mb-10 glass-panel p-5 flex items-center gap-6 border-l-4 border-l-brand-500 animate-slide-up delay-100">
         <div className="flex-1">
           <div className="flex justify-between text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
-            <span className="flex items-center gap-2">🚀 Progresso da Meta Anual</span>
+            <span className="flex items-center gap-2"><Rocket size={14} className="text-brand-400" /> Progresso da Meta Anual</span>
             <span className="text-brand-400">{goalProgressPercent.toFixed(1)}%</span>
           </div>
           <div className="w-full bg-dark-900 rounded-full h-3 border border-dark-800 p-[1px]">
@@ -185,7 +190,7 @@ function App() {
 
       <div className="flex-1 flex flex-col items-center justify-center text-center mb-12 animate-slide-up delay-200">
         <div className="inline-block px-4 py-1.5 rounded-full bg-dark-800/50 border border-dark-700 text-gray-400 text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
-          💎 Livre no Mês
+          <Zap size={14} className="text-brand-400" /> Livre no Mês
         </div>
         <h2 className={`text-6xl md:text-8xl font-black tracking-tighter mb-8 transition-colors duration-500 ${isDanger ? 'text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.2)]' : 'text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]'}`}>
           {formatBRL(safeToSpend)}
@@ -193,45 +198,45 @@ function App() {
 
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-brand-500 hover:bg-brand-400 text-white text-lg font-bold py-4 px-12 rounded-full transition-all shadow-[0_8px_30px_rgba(59,130,246,0.4)] hover:shadow-[0_8px_40px_rgba(59,130,246,0.6)] hover:-translate-y-1 active:translate-y-0"
+          className="bg-brand-500 hover:bg-brand-400 text-white text-lg font-bold py-4 px-12 rounded-full transition-all shadow-[0_8px_30px_rgba(59,130,246,0.4)] hover:shadow-[0_8px_40px_rgba(59,130,246,0.6)] hover:-translate-y-1 active:translate-y-0 flex items-center gap-2 mx-auto"
         >
-          <span className="mr-2">⚡</span> Adicionar Registro
+          <Plus size={20} strokeWidth={3} /> Adicionar Registro
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-slide-up delay-300">
         <div className="glass-panel p-6 border-t-4 border-t-dark-700">
           <h3 className="text-gray-400 text-sm mb-5 uppercase tracking-wider font-bold flex items-center gap-2">
-            🧮 A Matemática <span className="text-dark-500 capitalize normal-case font-medium">({currentMonthName.split(' ')[0]})</span>
+            <Calculator size={16} /> A Matemática <span className="text-dark-500 capitalize normal-case font-medium">({currentMonthName.split(' ')[0]})</span>
           </h3>
           
           <div className="space-y-4">
             <div className="pb-3 border-b border-dark-800/50">
               <div className="flex justify-between items-center">
-                <span className="text-gray-300 flex items-center gap-2"><span className="text-lg">🏢</span> Renda Fixa Base</span>
+                <span className="text-gray-300 flex items-center gap-2"><Briefcase size={16} className="text-dark-400" /> Renda Fixa Base</span>
                 <span className="text-green-400 font-medium">{formatBRL(goal.income)}</span>
               </div>
               <div className="flex justify-between items-center mt-3">
-                <span className="text-gray-300 flex items-center gap-2"><span className="text-lg">💸</span> Ganhos Extras/Avulsos</span>
+                <span className="text-gray-300 flex items-center gap-2"><Coins size={16} className="text-dark-400" /> Ganhos Extras/Avulsos</span>
                 <span className="text-green-400 font-medium">+{formatBRL(monthlyIncome)}</span>
               </div>
             </div>
             
             <div className="flex justify-between items-center pb-3 border-b border-dark-800/50">
-              <span className="text-gray-300 flex items-center gap-2"><span className="text-lg">📉</span> Gastos Realizados</span>
+              <span className="text-gray-300 flex items-center gap-2"><ArrowDownRight size={16} className="text-dark-400" /> Gastos Realizados</span>
               <span className="text-red-400 font-medium">-{formatBRL(monthlyExpense)}</span>
             </div>
 
             <div className="flex justify-between items-center pb-3 border-b border-dark-800/50">
-              <span className="text-gray-300 flex items-center gap-2"><span className="text-lg">🏦</span> Já Investido no Mês</span>
+              <span className="text-gray-300 flex items-center gap-2"><Landmark size={16} className="text-dark-400" /> Já Investido no Mês</span>
               <span className="text-white font-medium">{formatBRL(monthlyInvested)}</span>
             </div>
 
             {missingInvestment > 0 && (
               <div className="flex justify-between items-center pt-2 bg-brand-500/5 -mx-4 px-4 py-2 rounded-lg">
                 <div>
-                  <span className="text-brand-200 block flex items-center gap-2"><span className="text-lg">🛡️</span> Guarde p/ o Mês</span>
-                  <span className="text-xs text-brand-500/60">P/ bater a meta anual</span>
+                  <span className="text-brand-200 block flex items-center gap-2"><ShieldCheck size={16} className="text-brand-400" /> Guarde p/ o Mês</span>
+                  <span className="text-xs text-brand-500/60 ml-6">P/ bater a meta anual</span>
                 </div>
                 <span className="text-brand-400 font-bold">{formatBRL(missingInvestment)}</span>
               </div>
@@ -241,11 +246,11 @@ function App() {
 
         <div className="glass-panel p-6">
           <h3 className="text-gray-400 text-sm mb-5 uppercase tracking-wider font-bold flex items-center gap-2">
-            📝 Lançamentos Recentes
+            <ListOrdered size={16} /> Lançamentos Recentes
           </h3>
           {transactions.length === 0 ? (
             <div className="h-40 flex flex-col items-center justify-center text-dark-500">
-              <span className="text-4xl mb-2 opacity-50">📭</span>
+              <Inbox size={40} className="mb-2 opacity-50" strokeWidth={1} />
               <p className="italic text-sm">Nada registrado neste mês.</p>
             </div>
           ) : (
@@ -253,8 +258,8 @@ function App() {
               {transactions.map(tx => (
                 <div key={tx.id} className="flex justify-between items-center border-b border-dark-800/50 pb-3 last:border-0 hover:bg-dark-800/30 p-2 -mx-2 rounded-lg transition-colors group">
                   <div>
-                    <span className="text-gray-200 block font-medium">
-                      {tx.recurrent && <span className="text-brand-400 mr-2 text-xs" title="Custo Fixo">🔄</span>}
+                    <span className="text-gray-200 font-medium flex items-center gap-2">
+                      {tx.recurrent && <Repeat size={12} className="text-brand-400" title="Custo Fixo" />}
                       {tx.description}
                     </span>
                     <span className="text-xs text-gray-500 mt-1 block">
@@ -267,7 +272,7 @@ function App() {
                       {tx.type === 'expense' ? '-' : '+'}{formatBRL(tx.amount)}
                     </span>
                     <button onClick={() => handleDelete(tx.id)} className="w-8 h-8 flex items-center justify-center rounded-full text-dark-600 hover:text-red-500 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100" title="Apagar">
-                      ✖
+                      <X size={16} />
                     </button>
                   </div>
                 </div>
@@ -278,7 +283,7 @@ function App() {
 
         <div className="glass-panel p-6 md:col-span-2 border-t-4 border-t-brand-500 animate-slide-up delay-400">
           <h3 className="text-gray-400 text-sm mb-6 uppercase tracking-wider font-bold flex items-center gap-2">
-            📊 Raio-X: Onde você está gastando?
+            <PieChart size={16} /> Raio-X: Onde você está gastando?
           </h3>
           {chartData.length === 0 ? (
             <div className="py-8 flex flex-col items-center justify-center text-dark-500">
@@ -318,8 +323,8 @@ function App() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="glass-panel p-8 max-w-sm w-full animate-fade-scale">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2"><span>⚙️</span> Editar Meta</h2>
-              <button onClick={() => setIsEditingGoal(false)} className="text-gray-500 hover:text-white text-2xl transition-colors">&times;</button>
+              <h2 className="text-xl font-bold text-white flex items-center gap-2"><Settings className="text-brand-400" size={20} /> Editar Meta</h2>
+              <button onClick={() => setIsEditingGoal(false)} className="text-gray-500 hover:text-white transition-colors"><X size={24} /></button>
             </div>
             
             <form onSubmit={saveGoalEdit} className="space-y-5">

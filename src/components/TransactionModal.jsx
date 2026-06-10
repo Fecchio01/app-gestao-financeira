@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { DataLayer } from '../lib/data';
+import { PlusCircle, X } from 'lucide-react';
 
 const CATEGORIES = {
   income: ['Salário', 'Freelance', 'Rendimento', 'Cashback', 'Outro'],
@@ -47,8 +48,12 @@ export default function TransactionModal({ onClose, onSave, safeToSpend, missing
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="glass-panel p-8 max-w-sm w-full animate-fade-scale">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2"><span>⚡</span> Novo Registro</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-white text-2xl transition-colors">&times;</button>
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <PlusCircle size={20} className="text-brand-400" /> Novo Registro
+          </h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">
+            <X size={24} />
+          </button>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-5">
