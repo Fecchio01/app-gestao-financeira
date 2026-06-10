@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { DataLayer } from '../lib/data';
-import { PlusCircle, X } from 'lucide-react';
+import { PlusCircle, X, Loader2 } from 'lucide-react';
 
 const CATEGORIES = {
   income: ['Salário', 'Freelance', 'Rendimento', 'Cashback', 'Outro'],
@@ -14,6 +14,7 @@ export default function TransactionModal({ onClose, onSave, safeToSpend, missing
   const [category, setCategory] = useState(CATEGORIES['expense'][0]);
   const [description, setDescription] = useState('');
   const [isRecurrent, setIsRecurrent] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleTypeChange = (newType) => {
     setType(newType);
@@ -28,17 +29,19 @@ export default function TransactionModal({ onClose, onSave, safeToSpend, missing
   const isOverLimit = type !== 'income' && parsedAmount > limitForTransaction;
   const isWarning = type !== 'income' && parsedAmount > 0 && parsedAmount > (limitForTransaction * 0.8) && !isOverLimit;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!amount || isOverLimit) return;
     
-    DataLayer.addTransaction({
+    setLoading(true);
+    await DataLayer.addTransaction({
       type,
       amount: parsedAmount,
       category,
       description: description || category,
       recurrent: type === 'expense' ? isRecurrent : false
     });
+    setLoading(false);
     onSave();
   };
 
@@ -100,8 +103,8 @@ export default function TransactionModal({ onClose, onSave, safeToSpend, missing
             </div>
           )}
 
-          <button disabled={isOverLimit} type="submit" className={`w-full font-bold py-3.5 rounded-xl mt-6 shadow-[0_8px_20px_rgba(0,0,0,0.2)] transition-all ${isOverLimit ? 'bg-dark-800 text-dark-500 cursor-not-allowed border border-dark-700' : 'bg-brand-500 hover:bg-brand-400 text-white hover:-translate-y-0.5 active:translate-y-0'}`}>
-            Confirmar
+          <button disabled={isOverLimit || loading} type="submit" className={`w-full font-bold py-3.5 rounded-xl mt-6 shadow-[0_8px_20px_rgba(0,0,0,0.2)] transition-all flex items-center justify-center ${isOverLimit ? 'bg-dark-800 text-dark-500 cursor-not-allowed border border-dark-700' : 'bg-brand-500 hover:bg-brand-400 text-white hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:hover:translate-y-0'}`}>
+            {loading ? <Loader2 size={18} className="animate-spin" /> : 'Confirmar'}
           </button>
         </form>
       </div>

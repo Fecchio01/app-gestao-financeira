@@ -1,22 +1,23 @@
 import { useState } from 'react';
 import { DataLayer } from '../lib/data';
-import { Hexagon, Wallet, Briefcase, Target, ArrowRight } from 'lucide-react';
+import { Hexagon, Wallet, Briefcase, Target, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function Onboarding({ onComplete }) {
   const [income, setIncome] = useState('');
   const [annualGoal, setAnnualGoal] = useState('');
   const [initialBalance, setInitialBalance] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!income || !annualGoal) return;
     
-    localStorage.removeItem('transactions');
-    
-    DataLayer.setUserGoal({ 
+    setLoading(true);
+    await DataLayer.setUserGoal({ 
       income: parseFloat(income), 
       annualGoal: parseFloat(annualGoal),
       initialBalance: parseFloat(initialBalance || 0)
     });
+    setLoading(false);
     onComplete();
   };
 
@@ -59,8 +60,12 @@ export default function Onboarding({ onComplete }) {
             <input type="number" className="w-full bg-dark-900 border border-dark-700 rounded-xl p-3 text-white focus:outline-none focus:border-brand-500 transition-colors group-hover:border-dark-600" placeholder="Ex: 12000" value={annualGoal} onChange={(e) => setAnnualGoal(e.target.value)} />
           </div>
           
-          <button onClick={handleSave} className="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3.5 rounded-xl mt-8 shadow-[0_8px_20px_rgba(59,130,246,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
-            Ligar Motores <ArrowRight size={18} strokeWidth={2.5} />
+          <button 
+            disabled={loading}
+            onClick={handleSave} 
+            className="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3.5 rounded-xl mt-8 shadow-[0_8px_20px_rgba(59,130,246,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:scale-100"
+          >
+            {loading ? <Loader2 size={18} className="animate-spin" /> : <><ArrowRight size={18} strokeWidth={2.5} /> Ligar Motores</>}
           </button>
         </div>
       </div>

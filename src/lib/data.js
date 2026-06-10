@@ -1,22 +1,105 @@
-export const DataLayer = {
-  get: (key) => JSON.parse(localStorage.getItem(key) || 'null'),
-  set: (key, data) => localStorage.setItem(key, JSON.stringify(data)),
-  
-  getUserGoal: () => DataLayer.get('user_goal'),
-  setUserGoal: (goalData) => DataLayer.set('user_goal', goalData),
+import { supabase } from './supabase';
 
-  getTransactions: () => DataLayer.get('transactions') || [],
-  addTransaction: (tx) => {
-    const txs = DataLayer.getTransactions();
-    tx.id = Date.now().toString();
-    tx.date = new Date().toISOString();
-    txs.push(tx);
-    DataLayer.set('transactions', txs);
-    return tx;
+export const DataLayer = {
+  async getUserGoal() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return null;
+
+    const { data, error } = await supabase
+      .from('user_goals')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found
+      console.error('Error fetching goal:', error);
+      return null;
+    }
+    
+    if (data) {
+      return {
+        income: Number(data.income),
+        annualGoal: Number(data.annual_goal),
+        initialBalance: Number(data.initial_balance)
+      };
+    }
+    return null;
   },
-  removeTransaction: (id) => {
-    let txs = DataLayer.getTransactions();
-    txs = txs.filter(t => t.id !== id);
-    DataLayer.set('transactions', txs);
+
+  async setUserGoal(goalData) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const payload = {
+      user_id: session.user.id,
+      income: goalData.income,
+      annual_goal: goalData.annualGoal,
+      initial_balance: goalData.initialBalance
+    };
+
+    const { error } = await supabase
+      .from('user_goals')
+      .upsert(payload, { onConflict: 'user_id' });
+
+    if (error) console.error('Error setting goal:', error);
+  },
+
+  async getTransactions() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return [];
+
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('date', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching transactions:', error);
+      return [];
+    }
+
+    return data;
+  },
+
+  async addTransaction(tx) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const payload = {
+      user_id: session.user.id,
+      type: tx.type,
+      amount: tx.amount,
+      category: tx.category,
+      description: tx.description,
+      recurrent: tx.recurrent
+    };
+
+    const { error } = await supabase
+      .from('transactions')
+      .insert(payload);
+
+    if (error) console.error('Error adding transaction:', error);
+  },
+
+  async removeTransaction(id) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const { error } = await supabase
+      .from('transactions')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', session.user.id);
+
+    if (error) console.error('Error deleting transaction:', error);
+  },
+  
+  async resetAll() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    await supabase.from('transactions').delete().eq('user_id', session.user.id);
+    await supabase.from('user_goals').delete().eq('user_id', session.user.id);
   }
 };

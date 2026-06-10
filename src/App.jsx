@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
 import Onboarding from './components/Onboarding';
 import TransactionModal from './components/TransactionModal';
+import Login from './components/Login';
 import { DataLayer } from './lib/data';
+import { supabase } from './lib/supabase';
 import { 
   Hexagon, PenLine, Zap, Plus, Calculator, Briefcase, Coins, 
   ArrowDownRight, Landmark, ShieldCheck, ListOrdered, Inbox, 
-  Repeat, X, PieChart, Settings, Rocket, Target
+  Repeat, X, PieChart, Settings, Rocket, Target, LogOut
 } from 'lucide-react';
 
 function App() {
+  const [session, setSession] = useState(null);
   const [needsOnboarding, setNeedsOnboarding] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
   
   const [isEditingGoal, setIsEditingGoal] = useState(false);
   const [editBanca, setEditBanca] = useState('');
@@ -28,17 +32,32 @@ function App() {
   const now = new Date();
   const currentMonthName = now.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
 
-  const loadData = () => {
-    const userGoal = DataLayer.getUserGoal();
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const loadData = async () => {
+    if (!session) return;
+    setLoadingData(true);
+
+    const userGoal = await DataLayer.getUserGoal();
     if (userGoal && userGoal.annualGoal !== undefined) {
       setNeedsOnboarding(false);
       setGoal(userGoal);
     } else {
       setNeedsOnboarding(true);
+      setLoadingData(false);
       return;
     }
     
-    const txs = DataLayer.getTransactions();
+    const txs = await DataLayer.getTransactions();
     const currentMonthStr = now.toISOString().slice(0, 7); 
     
     let mIncome = 0;
@@ -75,26 +94,32 @@ function App() {
       }
     });
 
-    setTransactions(displayTxs.reverse());
+    setTransactions(displayTxs);
     setMonthlyIncome(mIncome);
     setMonthlyExpense(mExpense);
     setMonthlyInvested(mInvested);
     setAllTimeInvested(totalInvested);
     setExpensesByCategory(expenseByCat);
+    setLoadingData(false);
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (session) {
+      loadData();
+    }
+  }, [session]);
 
-  const resetData = () => {
-    localStorage.removeItem('user_goal');
-    localStorage.removeItem('transactions');
+  const resetData = async () => {
+    await DataLayer.resetAll();
     setNeedsOnboarding(true);
   };
 
-  const handleDelete = (id) => {
-    DataLayer.removeTransaction(id);
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
+  const handleDelete = async (id) => {
+    await DataLayer.removeTransaction(id);
     loadData();
   };
 
@@ -104,9 +129,9 @@ function App() {
     setIsEditingGoal(true);
   };
 
-  const saveGoalEdit = (e) => {
+  const saveGoalEdit = async (e) => {
     e.preventDefault();
-    DataLayer.setUserGoal({
+    await DataLayer.setUserGoal({
       ...goal,
       initialBalance: parseFloat(editBanca),
       annualGoal: parseFloat(editMeta)
@@ -114,6 +139,18 @@ function App() {
     setIsEditingGoal(false);
     loadData();
   };
+
+  if (!session) {
+    return <Login />;
+  }
+
+  if (loadingData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Hexagon size={48} className="text-brand-500 animate-spin" />
+      </div>
+    );
+  }
 
   if (needsOnboarding) {
     return <Onboarding onComplete={loadData} />;
@@ -164,9 +201,14 @@ function App() {
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> {currentMonthName}
           </p>
         </div>
-        <button onClick={resetData} className="text-xs text-dark-500 hover:text-red-500 transition-colors uppercase tracking-wider font-bold">
-          [ Resetar Tudo ]
-        </button>
+        <div className="flex items-center gap-4">
+          <button onClick={resetData} className="text-xs text-dark-500 hover:text-red-500 transition-colors uppercase tracking-wider font-bold">
+            [ Resetar ]
+          </button>
+          <button onClick={handleLogout} className="text-xs text-dark-400 hover:text-white transition-colors uppercase tracking-wider font-bold flex items-center gap-1 bg-dark-800/50 px-3 py-1.5 rounded-lg">
+            <LogOut size={12} /> Sair
+          </button>
+        </div>
       </header>
 
       {/* Barra de Progresso Anual */}
